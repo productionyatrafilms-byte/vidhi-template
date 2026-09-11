@@ -27,7 +27,7 @@
     0% {
         opacity: 0;
         transform: scale(0.05);
-        filter: blur(1vw);
+        filter: blur(1cqw);
         animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
     }
     30% {
@@ -85,15 +85,21 @@
     src: local("Otama");
 }
 
+/* matches template/projects/new/css/style.css (not the old template): html just gets
+   height:100% with no overflow override (default visible), and the scrollbar — hidden
+   horizontal, auto vertical — lives on body, same as the shared style.css `body` rule already
+   in this project. On mobile the visual viewport can end up shorter than the `vh`-based height
+   this layout was computed against (address bar showing/hiding, etc.); without this, that
+   difference would be clipped with no way to reach it. */
 html {
-    overflow: hidden;
+    height: 100%;
 }
 
 body.gyan-page {
     display: flex;
     align-items: center;
     justify-content: center;
-    overflow: hidden;
+    overflow: hidden auto;
     background: var(--color-bg-fallback);
 }
 
@@ -122,15 +128,25 @@ body.gyan-page {
     opacity: 0.12;
 }
 
-/* ===== stage — locked to Figma's 1920:1080 canvas, scales like a Figma preview ===== */
+/* ===== stage — locked to Figma's 1920:1080 canvas, scales like a Figma preview =====
+   `container-type: inline-size` turns .stage into a query container, so every `cqw` used
+   below (everywhere inside .stage) means "1% of the stage's own width" — regardless of how
+   big or small the stage itself ends up. That's what actually fixes the old clipping bug:
+   with plain `vw`, capping .stage's width by `vh` (to stop it exceeding the viewport height on
+   landscape/short screens) made the stage narrower than 100vw, but every vw-sized child kept
+   computing against the full viewport instead of the now-smaller stage — oversized relative to
+   the box that's supposed to contain it, and clipped by this element's own overflow:hidden.
+   cqw sidesteps that entirely, so the vh cap (limiting how much extra scroll a short/landscape
+   viewport ever needs) can come back without reintroducing the mismatch. */
 .stage {
     position: relative;
     z-index: 1;
+    container-type: inline-size;
     width: min(100%, 177.78vh);
     aspect-ratio: 1920 / 1080;
     margin: 0 auto;
     overflow: hidden;
-    border-radius: 1.5625vw;
+    border-radius: 1.5625cqw;
 }
 
 .stage__floor-shadow {
@@ -153,7 +169,10 @@ body.gyan-page {
    corners in vw rather than locked to the 1920:1080 canvas, same trade-off the old Meghkumar
    build made for the same elements. */
 .btn-home {
-    position: absolute;
+    /* fixed, not absolute — now that the body can scroll vertically on short mobile
+       viewports, absolute (anchored to the initial containing block) would scroll away with
+       the page; fixed keeps it pinned to the viewport corner regardless. */
+    position: fixed;
     left: 2.6vw;
     top: 2.8vw;
     width: 3.1vw;
@@ -182,7 +201,7 @@ body.gyan-open .btn-home {
    as an oval rather than a circle. Fixed sizes below (width == height) instead of padding are
    what actually guarantee a circle regardless of the letter inside. */
 #langSelect {
-    position: absolute;
+    position: fixed;
     right: 2.6vw;
     top: 2.8vw;
     z-index: 20;
@@ -235,8 +254,8 @@ body.gyan-open .btn-home {
     text-align: center;
     color: #fff;
     font-weight: 400;
-    font-size: 13vw;
-    text-shadow: 0 0.3vw 1vw rgba(0, 0, 0, 0.45);
+    font-size: 13cqw;
+    text-shadow: 0 0.3cqw 1cqw rgba(0, 0, 0, 0.45);
     /* above .scroll-roller's z-index:8 — the closed scroll sits behind the title, not over it */
     z-index: 9;
     transition: opacity 0.4s ease;
@@ -255,14 +274,14 @@ body.gyan-open .btn-home {
     left: 50%;
     top: 89%;
     transform: translateX(-50%);
-    padding: 0.3vw 1.6vw;
+    padding: 0.3cqw 1.6cqw;
     display: flex;
     align-items: center;
     justify-content: center;
     border: none;
-    border-radius: 2.6vw;
+    border-radius: 2.6cqw;
     background: rgba(255, 255, 255, 0.1);
-    box-shadow: 0 0.21vw 0.21vw rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0.21cqw 0.21cqw rgba(0, 0, 0, 0.25);
     cursor: pointer;
     z-index: 6;
     /* backwards (not forwards) fill: hides it for the delay, then hands opacity back to the
@@ -274,8 +293,8 @@ body.gyan-open .btn-home {
 
 .idle-click__label {
     color: #fff;
-    font-size: 2.1vw;
-    text-shadow: 0 0.21vw 0.21vw rgba(0, 0, 0, 0.25);
+    font-size: 2.1cqw;
+    text-shadow: 0 0.21cqw 0.21cqw rgba(0, 0, 0, 0.25);
     white-space: nowrap;
 }
 
@@ -298,7 +317,7 @@ body.gyan-open .btn-home {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 1vw;
+    gap: 1cqw;
     opacity: 0;
     transition: opacity 0.5s ease 0.5s;
     z-index: 5;
@@ -310,7 +329,7 @@ body.gyan-open .btn-home {
 }
 
 .gyan-header__icon {
-    width: 2.81vw;
+    width: 2.81cqw;
     height: auto;
 }
 
@@ -318,21 +337,21 @@ body.gyan-open .btn-home {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 0.35vw;
+    gap: 0.35cqw;
 }
 
 .gyan-header__rule {
     display: block;
-    width: 21.3vw;
-    height: 0.08vw;
+    width: 21.3cqw;
+    height: 0.08cqw;
     background: rgba(255, 255, 255, 0.8);
 }
 
 .gyan-header__title {
     margin: 0;
     color: #fff;
-    font-size: 2.9vw;
-    letter-spacing: 0.15vw;
+    font-size: 2.9cqw;
+    letter-spacing: 0.15cqw;
 }
 
 /* later/header title — Baloo overrides style.css's global .english (also Baloo, kept explicit
@@ -436,7 +455,7 @@ body.gyan-open .btn-home {
     width: 0%;
     height: 50.93%;
     overflow: hidden;
-    border-radius: 0.8vw;
+    border-radius: 0.8cqw;
     z-index: 7;
     /* same plain ease-out, same duration, as .scroll-roller's `left` transition — no overshoot,
        just a simple reveal that grows exactly in step with the roll */
@@ -512,10 +531,10 @@ body.gyan-open .btn-home {
 
 .gyan-slide__placeholder-note {
     margin: 0;
-    padding: 0 4vw;
+    padding: 0 4cqw;
     text-align: center;
     color: #e8c98a;
-    font-size: 1.4vw;
+    font-size: 1.4cqw;
     line-height: 1.5;
 }
 
@@ -632,13 +651,13 @@ body.gyan-open .btn-home {
        collapse to ~0 — use vw (71px/1920*100) so it's independent of the flex row's height.
        Shared with .gyan-nav__label below so a translateY in whole multiples of this one
        value always lands exactly on a label, with no border/percentage rounding drift. */
-    --pill-h: 3.7vw;
+    --pill-h: 3.7cqw;
     width: 22%;
     height: var(--pill-h);
-    border: 0.16vw solid var(--color-pill-border);
-    border-radius: 5.25vw;
+    border: 0.16cqw solid var(--color-pill-border);
+    border-radius: 5.25cqw;
     background: linear-gradient(180deg, var(--color-pill-from), var(--color-pill-to));
-    box-shadow: 0 0.57vw 0.8vw -0.05vw rgba(0, 0, 0, 0.25);
+    box-shadow: 0 0.57cqw 0.8cqw -0.05cqw rgba(0, 0, 0, 0.25);
     overflow: hidden;
     position: relative;
 }
@@ -661,8 +680,8 @@ body.gyan-open .btn-home {
     width: 100%;
     height: var(--pill-h);
     color: #fff;
-    text-shadow: 0 0.05vw 0 rgba(0, 0, 0, 0.25);
-    font-size: 1.6vw;
+    text-shadow: 0 0.05cqw 0 rgba(0, 0, 0, 0.25);
+    font-size: 1.6cqw;
     font-weight: 700;
 }
 

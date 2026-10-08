@@ -32,6 +32,20 @@
     function render() {
         slides.forEach(function (slide, i) {
             slide.classList.toggle('is-active', i === index);
+            // only the active slide's video loads fully; the others stay unloaded
+            var video = slide.querySelector('video');
+            if (video) {
+                if (i === index) {
+                    if (video.preload !== 'auto') {
+                        video.preload = 'auto';
+                        // changing preload alone may not start a download, so force one
+                        // if the active slide has no frame yet
+                        if (video.readyState < 2) { video.load(); }
+                    }
+                } else {
+                    video.preload = 'none';
+                }
+            }
         });
         // whole multiples of --pill-h (shared with .gyan-nav__list span's height) so every
         // label lands exactly in the clipped pill window, with no % rounding drift.

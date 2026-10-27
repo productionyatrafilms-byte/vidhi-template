@@ -547,11 +547,15 @@ body.gyan-open .btn-home {
     height: 9.63%;
     z-index: 9;
     opacity: 0;
-    transition: opacity 0.4s ease 1.3s;
+    /* opacity:0 still hit-tests, so the invisible play button would start the video when the
+       centre is clicked on the idle page — visibility:hidden blocks that until it's shown. */
+    visibility: hidden;
+    transition: opacity 0.4s ease 1.3s, visibility 0s linear 1.3s;
 }
 
 .stage[data-state="open"] .scroll-play {
     opacity: 1;
+    visibility: visible;
 }
 
 /* solo play button (rest state) and the pause+replay pair (playing state) occupy the same
